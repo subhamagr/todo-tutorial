@@ -21,16 +21,30 @@ db.init_app(app)
 manager = Manager(app)
 
 
-@app.route('/todos', methods=['GET'])
-def todos():
+@app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
+@app.route('/todos/<int:todo_id>', methods=['DELETE'])
+def todos_api(todo_id):
+    if request.method == 'GET':
+        return throw_todos()
+
+    if request.method == 'POST':
+        return add_todo()
+
+    if request.method == 'PUT':
+        return mark_complete()
+
+    if request.method == 'DELETE':
+        return delete_todo(todo_id)
+
+
+def throw_todos():
     response = dict()
     todos = Todo.query.all()
     response['todos'] = [todo.json_dump() for todo in todos]
     return jsonify(response), 200
 
 
-@app.route('/add', methods=['POST'])
-def add():
+def add_todo():
     item_json = request.json
     item = item_json['item']
 
@@ -47,25 +61,7 @@ def add():
     return jsonify(response), 201
 
 
-@app.route('/delete/<int:todo_id>', methods=['DELETE'])
-def delete(todo_id):
-
-    response = dict()
-    todo_item = Todo.query.get(todo_id)
-
-    if not todo_item:
-        response['message'] = 'Invalid'
-        return jsonify({'message': 'Invalid'}), 409
-
-    db.session.delete(todo_item)
-    db.session.commit()
-
-    response['message'] = 'Todo successfully deleted'
-    return jsonify(response), 201
-
-
-@app.route('/complete', methods=['PUT'])
-def complete():
+def mark_complete():
     item_json = request.json
     todo_id = item_json['todo_id']
     is_complete = item_json['is_complete']
@@ -73,15 +69,31 @@ def complete():
     response = dict()
     todo_item = Todo.query.get(todo_id)
 
-    if not todo_item or type(is_complete) != bool:
-        response['message'] = 'Invalid'
-        return jsonify({'message': 'Invalid'}), 409
+    if not todo_item:
+        return jsonify({'message': 'Not found'}), 404
+    if type(is_complete) != bool:
+        return jsonify({'message': 'Invalid complete status'}), 409
 
     todo_item.isComplete = is_complete
 
     db.session.commit()
 
     response['message'] = 'Todo successfully updated'
+    return jsonify(response), 201
+
+
+def delete_todo(todo_id):
+
+    response = dict()
+    todo_item = Todo.query.get(todo_id)
+
+    if not todo_item:
+        return jsonify({'message': 'Not found'}), 404
+
+    db.session.delete(todo_item)
+    db.session.commit()
+
+    response['message'] = 'Todo successfully deleted'
     return jsonify(response), 201
 
 

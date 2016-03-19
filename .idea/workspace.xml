@@ -3,9 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="727b5101-0b7e-4fe3-952d-72e53fdfd4c8" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apis.py" afterPath="$PROJECT_DIR$/apis.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/schema.py" afterPath="$PROJECT_DIR$/schema.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="todo-tutorial.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -54,8 +51,8 @@
       <file leaf-file-name="apis.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/apis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5415929">
-              <caret line="30" column="14" selection-start-line="30" selection-start-column="14" selection-end-line="30" selection-end-column="14" />
+            <state vertical-scroll-proportion="0.860177">
+              <caret line="93" column="15" selection-start-line="93" selection-start-column="15" selection-end-line="93" selection-end-column="15" />
               <folding>
                 <element signature="e#0#41#0" expanded="true" />
               </folding>
@@ -544,8 +541,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/apis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5415929">
-          <caret line="30" column="14" selection-start-line="30" selection-start-column="14" selection-end-line="30" selection-end-column="14" />
+        <state vertical-scroll-proportion="0.860177">
+          <caret line="93" column="15" selection-start-line="93" selection-start-column="15" selection-end-line="93" selection-end-column="15" />
           <folding>
             <element signature="e#0#41#0" expanded="true" />
           </folding>

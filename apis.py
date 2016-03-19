@@ -21,6 +21,70 @@ db.init_app(app)
 manager = Manager(app)
 
 
+@app.route('/todos', methods=['GET'])
+def todos():
+    response = dict()
+    todos = Todo.query.all()
+    response['todos'] = [todo.json_dump() for todo in todos]
+    return jsonify(response), 200
+
+
+@app.route('/add', methods=['POST'])
+def add():
+    item_json = request.json
+    item = item_json['item']
+
+    response = dict()
+
+    if item == '':
+        response['message'] = 'Invalid'
+        return jsonify({'message': 'Invalid'}), 409
+    todo_item = Todo(item)
+    db.session.add(todo_item)
+    db.session.commit()
+
+    response['message'] = 'Todo successfully added'
+    return jsonify(response), 201
+
+
+@app.route('/delete/<int:todo_id>', methods=['DELETE'])
+def delete(todo_id):
+
+    response = dict()
+    todo_item = Todo.query.get(todo_id)
+
+    if not todo_item:
+        response['message'] = 'Invalid'
+        return jsonify({'message': 'Invalid'}), 409
+
+    db.session.delete(todo_item)
+    db.session.commit()
+
+    response['message'] = 'Todo successfully deleted'
+    return jsonify(response), 201
+
+
+@app.route('/complete', methods=['PUT'])
+def complete():
+    item_json = request.json
+    todo_id = item_json['todo_id']
+    is_complete = item_json['is_complete']
+
+    response = dict()
+    todo_item = Todo.query.get(todo_id)
+
+    if not todo_item or type(is_complete) != bool:
+        response['message'] = 'Invalid'
+        return jsonify({'message': 'Invalid'}), 409
+
+    todo_item.isComplete = is_complete
+
+    db.session.commit()
+
+    response['message'] = 'Todo successfully updated'
+    return jsonify(response), 201
+
+
 @manager.command
 def createdb():
     db.drop_all()

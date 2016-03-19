@@ -1,7 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask.ext.script import Manager
 import os
-from schema import db
+from schema import db, Todo
 
 # configuration
 DEBUG = True
@@ -21,13 +21,6 @@ db.init_app(app)
 manager = Manager(app)
 
 
-@app.route('/')
-def index():
-    response = dict()
-    response['message'] = 'Hello world'
-    return jsonify(response)
-
-
 @manager.command
 def createdb():
     db.drop_all()
@@ -37,6 +30,11 @@ def createdb():
 @manager.command
 def dropall():
     db.drop_all()
+
+
+@manager.shell
+def make_shell_context():
+    return dict(app=app, db=db, Todo=Todo)
 
 if __name__ == '__main__':
     manager.run()

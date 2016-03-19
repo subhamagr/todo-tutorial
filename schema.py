@@ -13,5 +13,8 @@ class Todo(db.Model):
     def __init__(self, item):
         self.item = item
 
+    def json_dump(self):
+        return dict(id=self.id, item=self.item, isComplete=self.isComplete)
+
     def __repr__(self):
         return '<Todo {}>'.format(self.item)

@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from schema import Todo
 from app import app, db
-import os
+
 
 @app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
 @app.route('/todos/<int:todo_id>', methods=['DELETE'])

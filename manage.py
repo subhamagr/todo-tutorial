@@ -1,9 +1,13 @@
 from app import app, db
 from app.schema import Todo
 from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
+
 
 # create our little application
 manager = Manager(app)
+migrate = Migrate(app, db, compare_type=True)
+manager.add_command('db', MigrateCommand)
 
 
 @manager.command

@@ -21,7 +21,6 @@ def todos_api(todo_id):
 
 def throw_todos():
     response = dict()
-    print os.environ.get('DBUSER'), os.environ.get('DBPASS'), os.environ.get('DBHOST'), os.environ.get('TODODB')
     todos = Todo.query.all()
     response['todos'] = [todo.json_dump() for todo in todos]
     return jsonify(response), 200

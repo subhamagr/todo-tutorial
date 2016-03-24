@@ -1,0 +1,26 @@
+from app import app, db
+from app.schema import Todo
+from flask.ext.script import Manager
+
+# create our little application
+manager = Manager(app)
+
+
+@manager.command
+def createdb():
+    db.drop_all()
+    db.create_all()
+
+
+@manager.command
+def dropall():
+    db.drop_all()
+
+
+@manager.shell
+def make_shell_context():
+    return dict(app=app, db=db, Todo=Todo)
+
+if __name__ == '__main__':
+    manager.run()
+

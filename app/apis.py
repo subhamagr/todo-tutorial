@@ -1,25 +1,7 @@
-from flask import Flask, jsonify, request
-from flask.ext.script import Manager
+from flask import jsonify, request
+from schema import Todo
+from app import app, db
 import os
-from schema import db, Todo
-
-# configuration
-DEBUG = True
-SECRET_KEY = 'this-is-a-secret-key'
-
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@%s/%s' % (
-    os.environ['DBUSER'], os.environ['DBPASS'], os.environ['DBHOST'], os.environ['TODODB'])
-SQLALCHEMY_ECHO = False
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-
-# create our little application
-app = Flask(__name__)
-app.config.from_object(__name__)
-db.init_app(app)
-
-manager = Manager(app)
-
 
 @app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
 @app.route('/todos/<int:todo_id>', methods=['DELETE'])
@@ -39,6 +21,7 @@ def todos_api(todo_id):
 
 def throw_todos():
     response = dict()
+    print os.environ.get('DBUSER'), os.environ.get('DBPASS'), os.environ.get('DBHOST'), os.environ.get('TODODB')
     todos = Todo.query.all()
     response['todos'] = [todo.json_dump() for todo in todos]
     return jsonify(response), 200
@@ -83,7 +66,6 @@ def mark_complete():
 
 
 def delete_todo(todo_id):
-
     response = dict()
     todo_item = Todo.query.get(todo_id)
 
@@ -97,20 +79,8 @@ def delete_todo(todo_id):
     return jsonify(response), 201
 
 
-@manager.command
-def createdb():
-    db.drop_all()
-    db.create_all()
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'message': "Not Found"}), 404
 
 
-@manager.command
-def dropall():
-    db.drop_all()
-
-
-@manager.shell
-def make_shell_context():
-    return dict(app=app, db=db, Todo=Todo)
-
-if __name__ == '__main__':
-    manager.run()

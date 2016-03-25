@@ -1,10 +1,27 @@
 from flask import jsonify, request
-from schema import Todo
+from schema import Todo, User
+from helpers.jwt_helper import create_token
+from helpers import InvalidApiUsage
 from app import app, db
+from flask.ext.login import login_required
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    json = request.json
+    email = json['email']
+    password = json['password']
+
+    user = User.query.filter_by(email=email).first()
+    if user and user.verify_password(password):
+        return jsonify({'token': create_token(user.id)})
+    else:
+        raise InvalidApiUsage('Bad credentials', 401, payload=False)
 
 
 @app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
 @app.route('/todos/<int:todo_id>', methods=['DELETE'])
+@login_required
 def todos_api(todo_id):
     if request.method == 'GET':
         return throw_todos()
@@ -34,7 +51,7 @@ def add_todo():
 
     if item == '':
         response['message'] = 'Invalid'
-        return jsonify({'message': 'Invalid'}), 409
+        raise InvalidApiUsage('Invalid', 409)
     todo_item = Todo(item)
     db.session.add(todo_item)
     db.session.commit()
@@ -52,9 +69,10 @@ def mark_complete():
     todo_item = Todo.query.get(todo_id)
 
     if not todo_item:
-        return jsonify({'message': 'Not found'}), 404
+        raise InvalidApiUsage('Not found', 404)
+
     if type(is_complete) != bool:
-        return jsonify({'message': 'Invalid complete status'}), 409
+        raise InvalidApiUsage('Invalid complete status', 409)
 
     todo_item.isComplete = is_complete
 
@@ -81,5 +99,3 @@ def delete_todo(todo_id):
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'message': "Not Found"}), 404
-
-

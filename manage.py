@@ -1,5 +1,5 @@
 from app import app, db
-from app.schema import Todo
+from app.schema import Todo, User
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
@@ -23,7 +23,7 @@ def dropall():
 
 @manager.shell
 def make_shell_context():
-    return dict(app=app, db=db, Todo=Todo)
+    return dict(app=app, db=db, Todo=Todo, User=User)
 
 if __name__ == '__main__':
     manager.run()

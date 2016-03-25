@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, g
 from schema import Todo, User
 from helpers.jwt_helper import create_token
 from helpers import InvalidApiUsage
@@ -17,6 +17,22 @@ def login():
         return jsonify({'token': create_token(user.id)})
     else:
         raise InvalidApiUsage('Bad credentials', 401, payload=False)
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    json = request.json
+    email = json['email']
+    password = json['password']
+
+    user = User.query.filter_by(email=email).first()
+    if user:
+        raise InvalidApiUsage('User with same email id already exists', 409)
+    else:
+        user = User(email, password)
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({'message': 'Account successfully created'})
 
 
 @app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
@@ -38,7 +54,7 @@ def todos_api(todo_id):
 
 def throw_todos():
     response = dict()
-    todos = Todo.query.all()
+    todos = Todo.query.filter_by(user_id=g.user.id).all()
     response['todos'] = [todo.json_dump() for todo in todos]
     return jsonify(response), 200
 
@@ -52,7 +68,8 @@ def add_todo():
     if item == '':
         response['message'] = 'Invalid'
         raise InvalidApiUsage('Invalid', 409)
-    todo_item = Todo(item)
+    user = g.user
+    todo_item = Todo(item, user.id)
     db.session.add(todo_item)
     db.session.commit()
 
@@ -68,9 +85,11 @@ def mark_complete():
     response = dict()
     todo_item = Todo.query.get(todo_id)
 
+    user = g.user
     if not todo_item:
         raise InvalidApiUsage('Not found', 404)
-
+    if todo_item.user_id != user.id:
+        raise InvalidApiUsage('Unauthorized', 403)
     if type(is_complete) != bool:
         raise InvalidApiUsage('Invalid complete status', 409)
 
@@ -85,9 +104,11 @@ def mark_complete():
 def delete_todo(todo_id):
     response = dict()
     todo_item = Todo.query.get(todo_id)
-
+    user = g.user
     if not todo_item:
-        return jsonify({'message': 'Not found'}), 404
+        raise InvalidApiUsage('Not found', 404)
+    if todo_item.user_id != user.id:
+        raise InvalidApiUsage('Unauthorized', 403)
 
     db.session.delete(todo_item)
     db.session.commit()

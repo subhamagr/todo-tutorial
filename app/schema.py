@@ -8,11 +8,13 @@ db = SQLAlchemy()
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    item = db.Column(db.String(120), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    item = db.Column(db.String(120), nullable=False, unique=True)
     isComplete = db.Column(db.Boolean, default=False)
 
-    def __init__(self, item):
+    def __init__(self, item, user_id):
         self.item = item
+        self.user_id = user_id
 
     def json_dump(self):
         return dict(id=self.id, item=self.item, isComplete=self.isComplete)

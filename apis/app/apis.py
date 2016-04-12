@@ -1,22 +1,17 @@
 from flask import jsonify, request, g
 from schema import Todo, User
-from helpers.jwt_helper import create_token
 from helpers import InvalidApiUsage
-from app import app, db
-from flask.ext.login import login_required
+from app import app, db, auth
 
 
-@app.route('/login', methods=['POST'])
-def login():
-    json = request.json
-    email = json['email']
-    password = json['password']
-
+@auth.verify_password
+def verify_password(email, password):
     user = User.query.filter_by(email=email).first()
     if user and user.verify_password(password):
-        return jsonify({'token': create_token(user.id)})
+        g.user = user
+        return True
     else:
-        raise InvalidApiUsage('Bad credentials', 401, payload=False)
+        raise InvalidApiUsage('Unauthorized access', 401)
 
 
 @app.route('/register', methods=['POST'])
@@ -37,7 +32,7 @@ def register():
 
 @app.route('/todos', defaults={'todo_id': 0}, methods=['GET', 'POST', 'PUT'])
 @app.route('/todos/<int:todo_id>', methods=['DELETE'])
-@login_required
+@auth.login_required
 def todos_api(todo_id):
     if request.method == 'GET':
         return throw_todos()
